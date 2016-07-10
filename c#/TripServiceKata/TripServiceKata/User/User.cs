@@ -2,29 +2,34 @@
 
 namespace TripServiceKata.User
 {
-    public class User
-    {
-        private List<Trip.Trip> trips = new List<Trip.Trip>();
-        private List<User> friends = new List<User>();
+	public class User
+	{
+		private readonly List<User> _friends = new List<User>();
+		private readonly List<Trip.Trip> _trips = new List<Trip.Trip>();
 
-        public List<User> GetFriends()
-        {
-            return friends;
-        } 
+		public List<User> GetFriends()
+		{
+			return _friends;
+		}
 
-        public void AddFriend(User user)
-        {
-            friends.Add(user);
-        }
+		public bool IsFriendsWith(User anotherUser)
+		{
+			return _friends.Contains(anotherUser);
+		}
 
-        public void AddTrip(Trip.Trip trip)
-        {
-            trips.Add(trip);
-        }
+		public void AddFriend(User user)
+		{
+			_friends.Add(user);
+		}
 
-        public List<Trip.Trip> Trips()
-        {
-            return trips;
-        } 
-    }
+		public void AddTrip(Trip.Trip trip)
+		{
+			_trips.Add(trip);
+		}
+
+		public List<Trip.Trip> Trips()
+		{
+			return _trips;
+		}
+	}
 }
