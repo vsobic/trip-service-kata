@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using TripServiceKata.Exception;
 using TripServiceKata.Trip;
 
@@ -13,20 +13,23 @@ namespace TripServiceKata.Tests
 		private readonly User.User _registeredUser = new User.User();
 		private readonly Trip.Trip _toBrasil = new Trip.Trip();
 		private readonly Trip.Trip _toNoviSad = new Trip.Trip();
+
+		private readonly Mock<ITripDao> _tripDao = new Mock<ITripDao>();
 		private readonly User.User _unusedUser = null;
-		private TestableTripService _tripService;
+
+		private TripService _tripService;
 
 		[TestInitialize]
 		public void TestInitialize()
 		{
-			_tripService = new TestableTripService();
+			_tripService = new TripService(_tripDao.Object);
 		}
 
 		[TestMethod]
 		[ExpectedException(typeof (UserNotLoggedInException))]
 		public void ThrowAnExceptionWhenUserIsNotLoggedIn()
 		{
-			_tripService.GetTripsByUser(_unusedUser, _guest);
+			_tripService.GetFriendTrips(_unusedUser, _guest);
 		}
 
 		[TestMethod]
@@ -38,7 +41,7 @@ namespace TripServiceKata.Tests
 				.FriendsWith(_anotherUser)
 				.Build();
 
-			var friendTrips = _tripService.GetTripsByUser(friend, _registeredUser);
+			var friendTrips = _tripService.GetFriendTrips(friend, _registeredUser);
 
 			Assert.AreEqual(friendTrips.Count, 0);
 		}
@@ -52,17 +55,11 @@ namespace TripServiceKata.Tests
 				.WithTrips(_toBrasil, _toNoviSad)
 				.Build();
 
-			var friendTrips = _tripService.GetTripsByUser(friend, _registeredUser);
+			_tripDao.Setup(t => t.TripsBy(friend)).Returns(friend.Trips);
+
+			var friendTrips = _tripService.GetFriendTrips(friend, _registeredUser);
 
 			Assert.AreEqual(friendTrips.Count, 2);
-		}
-
-		private class TestableTripService : TripService
-		{
-			protected override List<Trip.Trip> TripsBy(User.User user)
-			{
-				return user.Trips();
-			}
 		}
 	}
 }
